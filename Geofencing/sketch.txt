@@ -1,0 +1,60 @@
+#include <TinyGPS++.h>
+#include <SoftwareSerial.h>
+
+static const int RXPin = 3, TXPin = 4;
+SoftwareSerial ss(RXPin, TXPin);
+TinyGPSPlus gps;
+
+const int buzzerPin = 5;
+const double HOME_LAT = 18.67032344;
+const double HOME_LON = 73.89045092;
+const double SAFE_RADIUS = 130.0;
+
+void setup() {
+  Serial.begin(9600);
+  ss.begin(9600);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  bool newData = false;
+  
+  // Read GPS data for 1 second
+  unsigned long start = millis();
+  while (millis() - start < 1000) {
+    while (ss.available()) {
+      char c = ss.read();
+      if (gps.encode(c)) {
+        newData = true;
+      }
+    }
+  }
+
+  if (newData) {
+    if (gps.location.isValid()) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      
+      double currentLat = gps.location.lat();
+      double currentLon = gps.location.lng();
+      double distance = TinyGPSPlus::distanceBetween(
+        HOME_LAT, HOME_LON, currentLat, currentLon
+      );
+
+      // Serial output for Python
+      Serial.print("TRACK:");
+      Serial.print(currentLat, 6);
+      Serial.print(",");
+      Serial.print(currentLon, 6);
+      Serial.print(",");
+      Serial.println(distance);
+
+      // Buzzer control
+      digitalWrite(buzzerPin, distance > SAFE_RADIUS ? HIGH : LOW);
+      
+    } else {
+      digitalWrite(LED_BUILTIN, LOW);
+      Serial.println("STATUS: Waiting for GPS fix...");
+    }
+  }
+}
