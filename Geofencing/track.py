@@ -18,7 +18,7 @@ MAP_FILE = "arrest_monitor.html"
 GPS_HISTORY_SIZE = 5  # gps ch history size, jyada increase nko kru slow houn jail
 # tera twilio ka account sign up kiya hai
 # email - harshad7237@gmail.com
-# pass -  tuze pata hai kya hai okay
+# pass - JX7GM0TK@**********  tuze pata hai * kya hai okay
 TWILIO_ACCOUNT_SID = 'ACe5a6261d91c4dadde60b382346dc9c2d'
 TWILIO_AUTH_TOKEN = '5e6ed8e424dc0047007a04811aaf79f4'
 TWILIO_PHONE_NUMBER = '+12293634873'
@@ -26,7 +26,7 @@ ALERT_RECIPIENTS = ['+917745860406']
 
 # yaha pe person ki details hai kuch galat ho toh edit kar lena
 PERSON_DETAILS = {
-    "name": "Harshad Gore",
+    "name": "Abhinav Badhe",
     "age": 19,
     "case_number": "HR/2025/7890",
     "offense": "Bail Voilation",
@@ -231,4 +231,26 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+# remote desktop access code - QM1NP5
+# acc sid - ACe5a6261d91c4dadde60b382346dc9c2d
+# auth token - 5e6ed8e424dc0047007a04811aaf79f4
+# twilio number - +12293634873
+
+
+# GPS Module -> Arduino
+# VCC       -> 3.3V
+# GND       -> GND
+# TX        -> D3
+# RX        -> D4
+
+# Buzzer -> Arduino
+# (+)     -> D5
+# (-)     -> GND
+
+# 2 software ek time pe same usb port nhi use kr sakte, toh serial monitor mat kholna
+# aur ardiuno me sketch upload karne se pehle ye program band karna, nahi toh upload nahi hoga
+
+
+# csv file me arrested person ka live data store hoga like uska location info, voilation type, aur bc jo bhi ho
 # all the best pillu 😆
