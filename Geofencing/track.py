@@ -26,7 +26,7 @@ ALERT_RECIPIENTS = ['+917745860406']
 
 # yaha pe person ki details hai kuch galat ho toh edit kar lena
 PERSON_DETAILS = {
-    "name": "Abhinav Badhe",
+    "name": "Harshad Gore",
     "age": 19,
     "case_number": "HR/2025/7890",
     "offense": "Bail Voilation",
