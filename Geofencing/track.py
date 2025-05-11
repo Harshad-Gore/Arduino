@@ -10,19 +10,21 @@ from math import radians, sin, cos, sqrt, atan2
 import csv
 from twilio.rest import Client
 import threading
+import firebase_admin
+from firebase_admin import credentials, db
 
-HOME_LAT = 18.6748823
-HOME_LON = 73.8917839
-SAFE_RADIUS = 20.0
+HOME_LAT = 18.675812
+HOME_LON = 73.892377
+SAFE_RADIUS = 220.0
 MAP_FILE = "arrest_monitor.html"
 GPS_HISTORY_SIZE = 5  # gps ch history size, jyada increase nko kru slow houn jail
 # tera twilio ka account sign up kiya hai
 # email - harshad7237@gmail.com
 # pass - JX7GM0TK@**********  tuze pata hai * kya hai okay
-TWILIO_ACCOUNT_SID = 'ACe5a6261d91c4dadde60b382346dc9c2d'
-TWILIO_AUTH_TOKEN = '5e6ed8e424dc0047007a04811aaf79f4'
-TWILIO_PHONE_NUMBER = '+12293634873'
-ALERT_RECIPIENTS = ['+917745860406']
+TWILIO_ACCOUNT_SID = 'AC41636e331ae638d83db346b487181ac2'
+TWILIO_AUTH_TOKEN = '4fa8818ba04dfbb7772119e2c3a0419d'
+TWILIO_PHONE_NUMBER = '+13806669056'
+ALERT_RECIPIENTS = ['+917887450090']
 
 # yaha pe person ki details hai kuch galat ho toh edit kar lena
 PERSON_DETAILS = {
@@ -50,13 +52,25 @@ client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
 last_sms_time = 0
 sms_lock = threading.Lock()
 
+# Firebase setup (replace with your own Firebase project details)
+FIREBASE_CRED_PATH = 'firebase_service_account.json'  # Place your service account key here
+FIREBASE_DB_URL = 'https://homearrestsystem-default-rtdb.firebaseio.com/'  # Replace with your Firebase DB URL
+
+firebase_initialized = False
+try:
+    cred = credentials.Certificate(FIREBASE_CRED_PATH)
+    firebase_admin.initialize_app(cred, {'databaseURL': FIREBASE_DB_URL})
+    firebase_initialized = True
+except Exception as e:
+    print(f"Firebase init failed: {e}")
+
 # yeh function sms bhejta hai jab kuch gadbad hota hai
 def send_sms_alert(message):
     global last_sms_time
     with sms_lock:
         now = time.time()
-        if now - last_sms_time < 5:
-            # time tere hisab se set kar, abhi 5 sec per sms hai
+        if now - last_sms_time < 10:
+            # time tere hisab se set kar, abhi 10 sec per sms hai
             return
         last_sms_time = now
         for recipient in ALERT_RECIPIENTS:
@@ -71,7 +85,7 @@ def send_sms_alert(message):
 
 def haversine(lat1, lon1, lat2, lon2):
     # distance nikalne ka formula hai yeh
-    R = 6371000
+    R = 6371000 # Radius of Earth in meters
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
     dlat = lat2 - lat1
     dlon = lon2 - lon1
@@ -109,6 +123,21 @@ def log_data(timestamp, lat, lng, distance, status):
     with open('tracking_log.csv', 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([timestamp, lat, lng, distance, status])
+
+def push_to_firebase(timestamp, lat, lng, distance, status):
+    if not firebase_initialized:
+        return
+    try:
+        ref = db.reference('tracking_logs')
+        ref.push({
+            'timestamp': timestamp,
+            'latitude': lat,
+            'longitude': lng,
+            'distance': distance,
+            'status': status
+        })
+    except Exception as e:
+        print(f"Firebase push failed: {e}")
 
 # map bana raha hai jaha pe home ka marker aur info box dikh raha hai
 def create_map():
@@ -199,32 +228,39 @@ def main():
         webbrowser.open(f"file://{os.path.abspath(MAP_FILE)}")
         init_log()
         previous_distance = 0
+        previous_lat, previous_lng = None, None
+        position_threshold = 0.00005  # ~5m, adjust as needed
         while True:
-            line = ser.readline().decode().strip()
+            line = ser.readline().decode(errors='ignore').strip()
             if line.startswith("TRACK:"):
-                # yaha pe gps ka data mil raha hai arduino se
-                data = line.split(":")[1].split(",")
-                raw_lat = float(data[0])
-                raw_lng = float(data[1])
-                lat, lng = process_gps_data(raw_lat, raw_lng)
-                distance = haversine(lat, lng, HOME_LAT, HOME_LON)
-                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                violation = check_violation(distance, previous_distance)
-                status = "NORMAL"
-                if violation:
-                    # agar boundry breach hua toh alert bhej raha hai
-                    alert_msg = f"{timestamp} - {violation} at {distance:.1f}m from residence"
-                    print(alert_msg)
-                    alert_history.append(alert_msg)
-                    send_sms_alert(
-                        f"\n{PERSON_DETAILS['name']} - {violation}\n"
-                        f"Coordinates: {lat:.6f}, {lng:.6f}\n"
-                        f"Distance: {distance:.1f}m\n"
-                    )
-                    status = violation
-                log_data(timestamp, lat, lng, distance, status)
-                update_map(m, lat, lng, distance)
-                previous_distance = distance
+                try:
+                    data = line.split(":")[1].split(",")
+                    raw_lat = float(data[0])
+                    raw_lng = float(data[1])
+                    lat, lng = process_gps_data(raw_lat, raw_lng)
+                    distance = haversine(lat, lng, HOME_LAT, HOME_LON)
+                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    violation = check_violation(distance, previous_distance)
+                    status = "NORMAL"
+                    # Only log/send if position changed significantly
+                    if previous_lat is None or abs(lat - previous_lat) > position_threshold or abs(lng - previous_lng) > position_threshold:
+                        if violation:
+                            alert_msg = f"{timestamp} - {violation} at {distance:.1f}m from residence"
+                            print(alert_msg)
+                            alert_history.append(alert_msg)
+                            send_sms_alert(
+                                f"\n{PERSON_DETAILS['name']} - {violation}\n"
+                                f"Coordinates: {lat:.6f}, {lng:.6f}\n"
+                                f"Distance: {distance:.1f}m\n"
+                            )
+                            status = violation
+                        log_data(timestamp, lat, lng, distance, status)
+                        push_to_firebase(timestamp, lat, lng, distance, status)
+                        update_map(m, lat, lng, distance)
+                        previous_lat, previous_lng = lat, lng
+                        previous_distance = distance
+                except Exception as e:
+                    print(f"Parse error: {e}")
     except Exception as e:
         print(f"Error: {str(e)}")
 
@@ -233,9 +269,9 @@ if __name__ == "__main__":
 
 
 # remote desktop access code - QM1NP5
-# acc sid - ACe5a6261d91c4dadde60b382346dc9c2d
-# auth token - 5e6ed8e424dc0047007a04811aaf79f4
-# twilio number - +12293634873
+# acc sid - AC41636e331ae638d83db346b487181ac2
+# auth token - 4fa8818ba04dfbb7772119e2c3a0419d
+# twilio number - +13806669056
 
 
 # GPS Module -> Arduino
