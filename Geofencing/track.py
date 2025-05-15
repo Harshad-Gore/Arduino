@@ -1,4 +1,4 @@
-# for our raybyte by eagle and lotus
+# Geofencing tracking system
 import serial
 from serial.tools import list_ports
 import folium
@@ -13,36 +13,34 @@ import threading
 import firebase_admin
 from firebase_admin import credentials, db
 
-HOME_LAT = 18.675812
-HOME_LON = 73.892377
+HOME_LAT = 12.345678
+HOME_LON = 65.432100
 SAFE_RADIUS = 220.0
 MAP_FILE = "arrest_monitor.html"
-GPS_HISTORY_SIZE = 5  # gps ch history size, jyada increase nko kru slow houn jail
-# tera twilio ka account sign up kiya hai
-# email - harshad7237@gmail.com
-# pass - JX7GM0TK@**********  tuze pata hai * kya hai okay
-TWILIO_ACCOUNT_SID = 'AC41636e331ae638d83db346b487181ac2'
-TWILIO_AUTH_TOKEN = '4fa8818ba04dfbb7772119e2c3a0419d'
-TWILIO_PHONE_NUMBER = '+13806669056'
-ALERT_RECIPIENTS = ['+917887450090']
+GPS_HISTORY_SIZE = 5  # number of GPS points to keep in history
+# Twilio account info
+TWILIO_ACCOUNT_SID = 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+TWILIO_AUTH_TOKEN = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+TWILIO_PHONE_NUMBER = '+15551234567'
+ALERT_RECIPIENTS = ['+15559876543']
 
-# yaha pe person ki details hai kuch galat ho toh edit kar lena
+# Person details
 PERSON_DETAILS = {
-    "name": "Abhinav Badhe",
-    "age": 19,
-    "case_number": "HR/2025/7890",
-    "offense": "Bail Voilation",
+    "name": "John Doe",
+    "age": 35,
+    "case_number": "CR/2025/1234",
+    "offense": "Sample Violation",
     "allowed_radius": f"{SAFE_RADIUS} meters",
-    "tracking_id": "GPS-ALERT-001",
-    "officer_in_charge": "Srikant Tiwari",
+    "tracking_id": "GPS-TRACK-123",
+    "officer_in_charge": "Officer Smith",
     "last_seen": "Initializing..."
 }
 
 HOME_DETAILS = {
-    "address": "Kanda Market, Pravara Water Canal",
-    "landmark": "Shelke Eye Hospital",
-    "city": "Shrirampur",
-    "jurisdiction": "Shrirampur Police"
+    "address": "123 Main Street",
+    "landmark": "City Park",
+    "city": "Anytown",
+    "jurisdiction": "Central Police Department"
 }
 
 gps_history = []
@@ -54,7 +52,7 @@ sms_lock = threading.Lock()
 
 # Firebase setup (replace with your own Firebase project details)
 FIREBASE_CRED_PATH = 'firebase_service_account.json'  # Place your service account key here
-FIREBASE_DB_URL = 'https://homearrestsystem-default-rtdb.firebaseio.com/'  # Replace with your Firebase DB URL
+FIREBASE_DB_URL = 'https://example-project-default-rtdb.firebaseio.com/'  # Example Firebase DB URL
 
 firebase_initialized = False
 try:
@@ -64,13 +62,13 @@ try:
 except Exception as e:
     print(f"Firebase init failed: {e}")
 
-# yeh function sms bhejta hai jab kuch gadbad hota hai
+# Function to send SMS alerts when violations occur
 def send_sms_alert(message):
     global last_sms_time
     with sms_lock:
         now = time.time()
         if now - last_sms_time < 10:
-            # time tere hisab se set kar, abhi 10 sec per sms hai
+            # Only send SMS every 10 seconds to avoid flooding
             return
         last_sms_time = now
         for recipient in ALERT_RECIPIENTS:
@@ -84,7 +82,7 @@ def send_sms_alert(message):
                 print(f"Failed to send SMS alert: {str(e)}")
 
 def haversine(lat1, lon1, lat2, lon2):
-    # distance nikalne ka formula hai yeh
+    # Calculate distance between two coordinates using the Haversine formula
     R = 6371000 # Radius of Earth in meters
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
     dlat = lat2 - lat1
@@ -93,7 +91,7 @@ def haversine(lat1, lon1, lat2, lon2):
     c = 2 * atan2(sqrt(a), sqrt(1-a))
     return R * c
 
-# gps ne smooth chalav tyamule average kartoy
+# Average GPS readings for smoother tracking
 def process_gps_data(raw_lat, raw_lng):
     global gps_history
     gps_history.append((raw_lat, raw_lng))
@@ -103,7 +101,7 @@ def process_gps_data(raw_lat, raw_lng):
     avg_lng = sum(p[1] for p in gps_history) / len(gps_history)
     return avg_lat, avg_lng
 
-# yaha pe dekh raha hai ki koi tez bhaag raha hai ya boundary cross kiya kya
+# Check if there's rapid movement or boundary breach
 def check_violation(distance, previous_distance):
     current_speed = abs(distance - previous_distance)
     if current_speed > 10:
@@ -112,14 +110,14 @@ def check_violation(distance, previous_distance):
         return "BOUNDARY BREACHED"
     return None
 
-# tracking ka data file me likhne ke liye file bana raha hai
+# Initialize the tracking log file
 def init_log():
     with open('tracking_log.csv', 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['Timestamp', 'Latitude', 'Longitude', 'Distance', 'Status'])
 
 def log_data(timestamp, lat, lng, distance, status):
-    # har update ka record rakh raha hai file me
+    # Record each GPS update to the tracking log file
     with open('tracking_log.csv', 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([timestamp, lat, lng, distance, status])
@@ -139,7 +137,7 @@ def push_to_firebase(timestamp, lat, lng, distance, status):
     except Exception as e:
         print(f"Firebase push failed: {e}")
 
-# map bana raha hai jaha pe home ka marker aur info box dikh raha hai
+# Create a map with home marker and info box
 def create_map():
     m = folium.Map(location=[HOME_LAT, HOME_LON], zoom_start=18)
     home_tooltip = f"""<b>{HOME_DETAILS['address']}</b><br>
@@ -167,7 +165,7 @@ def create_map():
     m.get_root().html.add_child(folium.Element(info_html))
     return m
 
-# yeh function har update pe map ko refresh karta hai aur banda ka marker dalta hai
+# Update map with subject's current position and refresh display
 def update_map(m, lat, lng, distance):
     for _ in range(3):
         try:
@@ -208,7 +206,7 @@ def update_map(m, lat, lng, distance):
             time.sleep(1)
 
 def get_arduino_port():
-    # yeh function arduino ka port dhundta hai system me
+    # Find the Arduino port in the system
     ports = list_ports.comports()
     for p in ports:
         if 'Arduino' in p.description or 'CH340' in p.description:
@@ -216,7 +214,7 @@ def get_arduino_port():
     return None
 
 def main():
-    # sab kuch yaha se start hota hai
+    # Main function to start the monitoring process
     arduino_port = get_arduino_port()
     if not arduino_port:
         return
@@ -268,10 +266,6 @@ if __name__ == "__main__":
     main()
 
 
-# remote desktop access code - QM1NP5
-# acc sid - AC41636e331ae638d83db346b487181ac2
-# auth token - 4fa8818ba04dfbb7772119e2c3a0419d
-# twilio number - +13806669056
 
 
 # GPS Module -> Arduino
@@ -284,9 +278,4 @@ if __name__ == "__main__":
 # (+)     -> D5
 # (-)     -> GND
 
-# 2 software ek time pe same usb port nhi use kr sakte, toh serial monitor mat kholna
-# aur ardiuno me sketch upload karne se pehle ye program band karna, nahi toh upload nahi hoga
-
-
-# csv file me arrested person ka live data store hoga like uska location info, voilation type, aur bc jo bhi ho
-# all the best pillu 😆
+# end of file
