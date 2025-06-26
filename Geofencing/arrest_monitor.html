@@ -1,14 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    
-        <script>
-            L_NO_TOUCH = false;
-            L_DISABLE_3D = false;
-        </script>
-    
+    <script>L_NO_TOUCH = false;L_DISABLE_3D = false;</script>
     <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
     <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -21,166 +15,112 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
-            <meta name="viewport" content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-                #map_63d7b8450d654d4664712b7712ff2803 {
-                    position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
-                    left: 0.0%;
-                    top: 0.0%;
-                }
-                .leaflet-container { font-size: 1rem; }
-            </style>
-        
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style>
+        #map_63d7b8450d654d4664712b7712ff2803 {
+            position: relative;
+            width: 100.0%;
+            height: 100.0%;
+            left: 0.0%;
+            top: 0.0%;
+        }
+        .leaflet-container { font-size: 1rem; }
+    </style>
 </head>
 <body>
-    
-    
     <div style="position:fixed;top:50px;left:50px;width:350px;background:white;padding:15px;z-index:9999;border:3px solid #cc0000;border-radius:10px;">
         <h3 style="color:#cc0000;margin-top:0;">Home Arrest Monitor</h3>
         <div style="background:#ffe6e6;padding:10px;border-radius:5px;">
             <h4 style="margin:0 0 10px 0;">Subject Details:</h4>
-            <p style="margin:5px 0;"><b>Name:</b> Abhinav Badhe<br><b>Case No:</b> HR/2025/7890<br><b>Tracking ID:</b> GPS-ALERT-001</p>
+            <p style="margin:5px 0;"><b>Name:</b> Ravi Sharma<br><b>Case No:</b> IN/2025/5678<br><b>Tracking ID:</b> GPS-IND-002</p>
         </div>
         <div style="margin-top:15px;background:#f0f0f0;padding:10px;border-radius:5px;">
             <p style="margin:5px 0;"><b>Last Update:</b> <span id="updateTime">-</span></p>
         </div>
     </div>
     <script>setTimeout(function(){window.location.reload(1);},3000);</script>
-    
-    
-            <script>
-            document.getElementById('updateTime').innerHTML = '2025-05-07 07:57:51';
-            </script>
-            
-    
-            <div class="folium-map" id="map_63d7b8450d654d4664712b7712ff2803" ></div>
-        
+    <script>document.getElementById('updateTime').innerHTML = '2025-06-01 10:00:00';</script>
+    <div class="folium-map" id="map_63d7b8450d654d4664712b7712ff2803"></div>
 </body>
 <script>
-    
-    
-            var map_63d7b8450d654d4664712b7712ff2803 = L.map(
-                "map_63d7b8450d654d4664712b7712ff2803",
-                {
-                    center: [18.6748823, 73.8917839],
-                    crs: L.CRS.EPSG3857,
-                    ...{
-  "zoom": 18,
-  "zoomControl": true,
-  "preferCanvas": false,
-}
-
-                }
-            );
-
-            
-
-        
-    
-            var tile_layer_4910972740ca13098e5d388deb77eaf7 = L.tileLayer(
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                {
-  "minZoom": 0,
-  "maxZoom": 19,
-  "maxNativeZoom": 19,
-  "noWrap": false,
-  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
-  "subdomains": "abc",
-  "detectRetina": false,
-  "tms": false,
-  "opacity": 1,
-}
-
-            );
-        
-    
-            tile_layer_4910972740ca13098e5d388deb77eaf7.addTo(map_63d7b8450d654d4664712b7712ff2803);
-        
-    
-            var marker_f7ebcb74b562b389c89bda9d35f774aa = L.marker(
-                [18.6748823, 73.8917839],
-                {
-}
-            ).addTo(map_63d7b8450d654d4664712b7712ff2803);
-        
-    
-            var icon_905c7cfd460688d252e247c1f585d6b0 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "red",
-  "iconColor": "white",
-  "icon": "home",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-            marker_f7ebcb74b562b389c89bda9d35f774aa.bindTooltip(
-                `<div>
-                     <b>Kanda Market, Pravara Water Canal</b><br>
-    Shelke Eye Hospital<br>
-    Shrirampur<br>
-    Jurisdiction: Shrirampur Police
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_f7ebcb74b562b389c89bda9d35f774aa.setIcon(icon_905c7cfd460688d252e247c1f585d6b0);
-            
-    
-            var marker_56e6a833a53ee187bf3a05b0a1c50587 = L.marker(
-                [18.67114, 73.889968],
-                {
-}
-            ).addTo(map_63d7b8450d654d4664712b7712ff2803);
-        
-    
-            var icon_e58c84be57077d3469bc015a91a62415 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "red",
-  "iconColor": "white",
-  "icon": "user",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-            marker_56e6a833a53ee187bf3a05b0a1c50587.bindTooltip(
-                `<div>
-                     <b>Abhinav Badhe</b><br>
-            Age: 19<br>
-            Case: HR/2025/7890<br>
-            Offense: Bail Voilation<br>
-            Last Seen: 2025-05-07 07:57:51<br>
-            Distance: 458.0m
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_56e6a833a53ee187bf3a05b0a1c50587.setIcon(icon_e58c84be57077d3469bc015a91a62415);
-            
-    
-            var circle_a4f1301cfc498e6d0265dea2796c8748 = L.circle(
-                [18.6748823, 73.8917839],
-                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20.0, "stroke": true, "weight": 3}
-            ).addTo(map_63d7b8450d654d4664712b7712ff2803);
-        
-    
-            var poly_line_a9e0d0ce6f1dcc611219c0209e239a52 = L.polyline(
-                [[18.6748823, 73.8917839], [18.67114, 73.889968]],
-                {"bubblingMouseEvents": true, "color": "blue", "dashArray": "5", "dashOffset": null, "fill": false, "fillColor": "blue", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 1.0, "smoothFactor": 1.0, "stroke": true, "weight": 2}
-            ).addTo(map_63d7b8450d654d4664712b7712ff2803);
-        
+    var map_63d7b8450d654d4664712b7712ff2803 = L.map(
+        "map_63d7b8450d654d4664712b7712ff2803",
+        {
+            center: [28.6139, 77.2090],
+            crs: L.CRS.EPSG3857,
+            ...{
+                "zoom": 18,
+                "zoomControl": true,
+                "preferCanvas": false,
+            }
+        }
+    );
+    var tile_layer = L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            "minZoom": 0,
+            "maxZoom": 19,
+            "maxNativeZoom": 19,
+            "noWrap": false,
+            "attribution": "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+            "subdomains": "abc",
+            "detectRetina": false,
+            "tms": false,
+            "opacity": 1,
+        }
+    );
+    tile_layer.addTo(map_63d7b8450d654d4664712b7712ff2803);
+    var marker_home = L.marker(
+        [28.6139, 77.2090],
+        {}
+    ).addTo(map_63d7b8450d654d4664712b7712ff2803);
+    var icon_home = L.AwesomeMarkers.icon({
+        "markerColor": "red",
+        "iconColor": "white",
+        "icon": "home",
+        "prefix": "glyphicon",
+        "extraClasses": "fa-rotate-0",
+    });
+    marker_home.bindTooltip(
+        `<div>
+            <b>12 Connaught Place</b><br>
+            Near Palika Bazaar<br>
+            New Delhi<br>
+            Jurisdiction: Delhi Police
+        </div>`,
+        { "sticky": true }
+    );
+    marker_home.setIcon(icon_home);
+    var marker_person = L.marker(
+        [28.6145, 77.2085],
+        {}
+    ).addTo(map_63d7b8450d654d4664712b7712ff2803);
+    var icon_person = L.AwesomeMarkers.icon({
+        "markerColor": "blue",
+        "iconColor": "white",
+        "icon": "user",
+        "prefix": "glyphicon",
+        "extraClasses": "fa-rotate-0",
+    });
+    marker_person.bindTooltip(
+        `<div>
+            <b>Ravi Sharma</b><br>
+            Age: 35<br>
+            Case: IN/2025/5678<br>
+            Offense: Test Offense<br>
+            Last Seen: 2025-06-01 10:00:00<br>
+            Distance: 70.0m
+        </div>`,
+        { "sticky": true }
+    );
+    marker_person.setIcon(icon_person);
+    var circle_fake = L.circle(
+        [28.6139, 77.2090],
+        {"bubblingMouseEvents": true, "color": "red", "fill": true, "fillColor": "red", "fillOpacity": 0.2, "opacity": 1.0, "radius": 200.0, "stroke": true, "weight": 3}
+    ).addTo(map_63d7b8450d654d4664712b7712ff2803);
+    var poly_line_fake = L.polyline(
+        [[28.6139, 77.2090], [28.6145, 77.2085]],
+        {"color": "blue", "dashArray": "5", "fill": false, "opacity": 1.0, "weight": 2}
+    ).addTo(map_63d7b8450d654d4664712b7712ff2803);
 </script>
 </html>

@@ -57,25 +57,25 @@
     </table>
     <script>
         var firebaseConfig = {
-            apiKey: "AIzaSyAgl1Gsq2Pvw4ePYDvbcD23aINWjJK0_ig",
-            authDomain: "homearrestsystem.firebaseapp.com",
-            projectId: "homearrestsystem",
-            storageBucket: "homearrestsystem.firebasestorage.app",
-            messagingSenderId: "242988605869",
-            appId: "1:242988605869:web:c76116ad198a118ac40124",
-            measurementId: "G-YXJFD5Y0LZ"
+            apiKey: "<API_KEY_PLACEHOLDER>",
+            authDomain: "<AUTH_DOMAIN_PLACEHOLDER>",
+            projectId: "<PROJECT_ID_PLACEHOLDER>",
+            storageBucket: "<STORAGE_BUCKET_PLACEHOLDER>",
+            messagingSenderId: "<MESSAGING_SENDER_ID_PLACEHOLDER>",
+            appId: "<APP_ID_PLACEHOLDER>",
+            measurementId: "<MEASUREMENT_ID_PLACEHOLDER>"
         };
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
 
         // Map setup
-        var map = L.map('map').setView([18.6748823, 73.8917839], 17);
+        var map = L.map('map').setView([28.6139, 77.2090], 17);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
         }).addTo(map);
-        var homeMarker = L.marker([18.6748823, 73.8917839]).addTo(map).bindPopup('Home Location').openPopup();
+        var homeMarker = L.marker([28.6139, 77.2090]).addTo(map).bindPopup('Home Location').openPopup();
         var personMarker = null;
-        var circle = L.circle([18.6748823, 73.8917839], { radius: 220, color: 'red', fillOpacity: 0.1 }).addTo(map);
+        var circle = L.circle([28.6139, 77.2090], { radius: 220, color: 'red', fillOpacity: 0.1 }).addTo(map);
 
         function updateMap(lat, lng, status) {
             if (personMarker) map.removeLayer(personMarker);
